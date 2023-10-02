@@ -51,15 +51,15 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const mysql = require('mysql');
 const bcrypt = require('bcrypt');
-
+require('dotenv').config();
 const app = express();
-const port = 5000;
+const port = process.env.PORT;
 
 const db = mysql.createConnection({
-  host: 'localhost',
-  user: 'root',
-  password: '',
-  database: 'test',
+  host:process.env.DB_HOST,
+  user:process.env.DB_USERNAME,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_DBNAME,
 });
 
 db.connect(err => {
@@ -74,7 +74,7 @@ app.use(bodyParser.json());
 //all users
 
 app.get('/api/students',(req,res)=>{
-        const sql="select * from students";
+        const sql="select * from student";
         db.query(sql,(err,data)=>{
             if(err){
                 return res.json(err);
@@ -137,10 +137,10 @@ app.post('/api/signup', async (req, res) => {
       const hashedPassword = await bcrypt.hash(password, saltRounds);
   
       // Insert user data into the database
-      const insertQuery = 'INSERT INTO students (student_firstname, student_lastname, rollnumber, class, section, parent_mobile_number,  password,email) VALUES (?, ?, ?, ?, ?, ?, ?, ?)';
+      const insertQuery = 'INSERT INTO student (student_firstname, student_lastname, rollnumber, class, section, parentnumber, email, password) VALUES (?, ?, ?, ?, ?, ?, ?, ?)';
       db.query(
         insertQuery,
-        [student_firstname, student_lastname, rollnumber, classofstudent, section, parent_mobile_number,  hashedPassword,email],
+        [student_firstname, student_lastname, rollnumber, classofstudent, section, parent_mobile_number,email, hashedPassword],
         (err, result) => {
           if (err) {
             console.error(err);
@@ -187,7 +187,7 @@ app.post('/api/signin', async (req, res) => {
   console.log(email,password);
   
     // Query the user by email
-    const selectQuery = 'SELECT * FROM students WHERE email = ?';
+    const selectQuery = 'SELECT * FROM student WHERE email = ?';
     db.query(selectQuery, [email], async (err, rows) => {
       if (err) {
         console.error(err);
